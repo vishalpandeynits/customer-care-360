@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block content %}
+<form method="post" action="#" id="send_message">
+    <input type="text" id="msg">
+    <input type="submit" value="Send">
+</form>
+
+<div>
+    <h3>Message</h3>
+    <p id="msg_log"></p>
+</div>
+<script>
+    var csrftoken = Cookies.get('csrftoken');
+    function csrfSafeMethod(method){
+        return (/^(GET|HEAD|TRACE|OPTIONS)$/).test(method);
+    }
+
+    $.ajaxSetup({
+        beforeSend : function(xhr, settings){
+            if(!csrfSafeMethod(settings.type) && !this.crossDomain){
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    function isOpen(ws) { return ws.readyState === ws.OPEN }
+    $(document).ready(function(){
+
+        var protocol = window.location.protocol;
+        ws_protocol = "ws://";
+        if(protocol=="wss://"){
+            ws_protocol = "wss://";
+        }
+
+        web_socket_url = ws_protocol + window.location.host + window.location.pathname;
+
+    	const web_socket = new WebSocket(web_socket_url);
+
+		web_socket.onopen = function(e){
+			console.log("open", e);
+		}
+
+		web_socket.onerror = function(e){
+			console.log("error", e);
+		}
+
+        web_socket.onmessage = function(e){
+            console.log("message", e);
+            var data = JSON.parse(e.data);
+            if('{{ request.user.username }}' == data['user'])
+                $('#msg_log').append('<br>Me : '+data['message']);
+            else
+                $('#msg_log').append('<br>'+data['user']+' : '+data['message']);
+        }
+
+        console.log(isOpen(web_socket) )
+
+        $('form#send_message').submit(function(event){
+            event.preventDefault();
+            web_socket.send(JSON.stringify({
+            'user': '{{ request.user.username }}',
+            'message': $('#msg').val()
+            }));
+            return false;
+        });
+    });
+
+</script>
+{% endblock %}

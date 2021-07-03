@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class=" box col-md-6 mx-auto">
+    {% if not user.is_authenticated %}
+    <h1 class="text-center lead heading">SIGN UP</h1>
+    <form method="post">{% csrf_token %}
+        {{ signupform|crispy }}
+        {{ profileform|crispy }}
+        <input type="submit" class="btn btn-primary" value="SAVE USER ">
+    </form>
+    {% else %}
+    You are logged in {{ user.username}}
+    {% endif %}
+</div>
+{% endblock %}

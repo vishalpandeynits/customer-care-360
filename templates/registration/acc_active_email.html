@@ -1,0 +1,4 @@
+{% autoescape off %}
+To activate your Account,  Visit this link
+<a  href="{{ site_name }}{% url 'activate' uidb64=uid token=token %}">{{ site_name }}{% url 'activate' uidb64=uid token=token %}</a>
+{% endautoescape %}
